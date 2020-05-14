@@ -38,7 +38,7 @@ func initPolicy(t *testing.T, driverName string, dataSourceName string, dbSpecif
 	// so we need to load the policy from the file adapter (.CSV) first.
 	e := casbin.NewEnforcer("examples/rbac_model.conf", "examples/rbac_policy.csv")
 
-	a := NewAdapter(driverName, dataSourceName, dbSpecified...)
+	a := NewAdapter(driverName, dataSourceName, "casbin",dbSpecified...)
 	// This is a trick to save the current policy to the DB.
 	// We can't call e.SavePolicy() because the adapter in the enforcer is still the file adapter.
 	// The current policy means the policy in the Casbin enforcer (aka in memory).
@@ -68,7 +68,7 @@ func testSaveLoad(t *testing.T, driverName string, dataSourceName string, dbSpec
 	// Now the DB has policy, so we can provide a normal use case.
 	// Create an adapter and an enforcer.
 	// NewEnforcer() will load the policy automatically.
-	a := NewAdapter(driverName, dataSourceName, dbSpecified...)
+	a := NewAdapter(driverName, dataSourceName,"casbin", dbSpecified...)
 	e := casbin.NewEnforcer("examples/rbac_model.conf", a)
 	testGetPolicy(t, e, [][]string{{"alice", "data1", "read"}, {"bob", "data2", "write"}, {"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}})
 }

@@ -43,6 +43,7 @@ type Adapter struct {
 	driverName     string
 	dataSourceName string
 	dbSpecified    bool
+	dbName string
 	db             *gorm.DB
 }
 
@@ -56,7 +57,7 @@ func finalizer(a *Adapter) {
 // It's up to whether you have specified an existing DB in dataSourceName.
 // If dbSpecified == true, you need to make sure the DB in dataSourceName exists.
 // If dbSpecified == false, the adapter will automatically create a DB named "casbin".
-func NewAdapter(driverName string, dataSourceName string, dbSpecified ...bool) *Adapter {
+func NewAdapter(driverName string, dataSourceName string,dbname string, dbSpecified ...bool) *Adapter {
 	a := &Adapter{}
 	a.driverName = driverName
 	a.dataSourceName = dataSourceName
@@ -71,7 +72,7 @@ func NewAdapter(driverName string, dataSourceName string, dbSpecified ...bool) *
 
 	// Open the DB, create it if not existed.
 	a.open()
-
+	a.dbName = dbname
 	// Call the destructor when the object is released.
 	runtime.SetFinalizer(a, finalizer)
 
@@ -119,9 +120,10 @@ func (a *Adapter) open() {
 		}
 
 		if a.driverName == "postgres" {
-			db, err = gorm.Open(a.driverName, a.dataSourceName+" dbname=casbin")
+			db, err = gorm.Open(a.driverName, a.dataSourceName+" dbname="+a.dbName)
 		} else {
-			db, err = gorm.Open(a.driverName, a.dataSourceName+"casbin")
+			//db, err = gorm.Open(a.driverName, a.dataSourceName+"casbin")
+			db, err = gorm.Open(a.driverName, a.dataSourceName+a.dbName)
 		}
 		if err != nil {
 			panic(err)
